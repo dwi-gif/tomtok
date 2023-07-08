@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TikTok Clone</title>
+  <style>
+    #video-player {
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <label for="user-input">Nama Pengguna:</label>
+  <input type="text" id="user-input">
+  <label for="title-input">Judul Video:</label>
+  <input type="text" id="title-input">
+  <input type="file" id="video-input" accept="video/*">
+  <button id="upload-button">Unggah Video</button>
+  <div id="video-container"></div>
+
+  <script>
+    // Mendapatkan referensi elemen-elemen HTML
+    const userInput = document.getElementById('user-input');
+    const titleInput = document.getElementById('title-input');
+    const videoInput = document.getElementById('video-input');
+    const uploadButton = document.getElementById('upload-button');
+    const videoContainer = document.getElementById('video-container');
+
+    // Event listener saat tombol unggah video ditekan
+    uploadButton.addEventListener('click', function() {
+      if (videoInput.files.length > 0) {
+        const videoFile = videoInput.files[0];
+        const videoURL = URL.createObjectURL(videoFile);
+        const username = userInput.value;
+        const title = titleInput.value;
+
+        // Membuat elemen video baru
+        const videoPlayer = document.createElement('video');
+        videoPlayer.id = 'video-player';
+        videoPlayer.src = videoURL;
+        videoPlayer.controls = true;
+
+        // Membuat elemen judul video
+        const videoTitle = document.createElement('h3');
+        videoTitle.textContent = title;
+
+        // Membuat tombol unduh video
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = 'Unduh Video';
+        downloadButton.addEventListener('click', function() {
+          const videoBlob = fetch(videoURL)
+            .then(response => response.blob())
+            .then(blob => {
+              // Membuat tautan unduhan
+              const downloadLink = document.createElement('a');
+              downloadLink.href = URL.createObjectURL(blob);
+              downloadLink.download = 'video.mp4';
+              downloadLink.click();
+            });
+        });
+
+        // Membuat tombol hapus video
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Hapus Video';
+        deleteButton.addEventListener('click', function() {
+          videoContainer.removeChild(videoPlayer);
+          videoContainer.removeChild(videoTitle);
+          videoContainer.removeChild(downloadButton);
+          videoContainer.removeChild(deleteButton);
+          localStorage.removeItem('uploadedVideo');
+        });
+
+        // Menambahkan video, judul video, tombol unduh, dan tombol hapus ke dalam container
+        videoContainer.appendChild(videoPlayer);
+        videoContainer.appendChild(videoTitle);
+        videoContainer.appendChild(downloadButton);
+        videoContainer.appendChild(deleteButton);
+
+        // Menyimpan informasi video di local storage
+        const videoData = {
+          username: username,
+          title: title,
+          videoURL: videoURL
+        };
+        localStorage.setItem('uploadedVideo', JSON.stringify(videoData));
+      }
+    });
+
+    // Memeriksa apakah ada video yang disimpan di local storage
+    const savedVideoDataStr = localStorage.getItem('uploadedVideo');
+    if (savedVideoDataStr) {
+      const savedVideoData = JSON.parse(savedVideoDataStr);
+
+      // Membuat elemen video baru
+      const savedVideoPlayer = document.createElement('video');
+      savedVideoPlayer.id = 'video-player';
+      savedVideoPlayer.src = savedVideoData.videoURL;
+      savedVideoPlayer.controls = true;
+
+      // Membuat elemen judul video
+      const savedVideoTitle = document.createElement('h3');
+      savedVideoTitle.textContent = savedVideoData.title;
+
+      // Membuat tombol unduh video
+      const savedDownloadButton = document.createElement('button');
+      savedDownloadButton.textContent = 'Unduh Video';
+      savedDownloadButton.addEventListener('click', function() {
+        const videoBlob = fetch(savedVideoData.videoURL)
+          .then(response => response.blob())
+          .then(blob => {
+            // Membuat tautan unduhan
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = 'video.mp4';
+            downloadLink.click();
+          });
+      });
+
+      // Membuat tombol hapus video
+      const savedDeleteButton = document.createElement('button');
+      savedDeleteButton.textContent = 'Hapus Video';
+      savedDeleteButton.addEventListener('click', function() {
+        videoContainer.removeChild(savedVideoPlayer);
+        videoContainer.removeChild(savedVideoTitle);
+        videoContainer.removeChild(savedDownloadButton);
+        videoContainer.removeChild(savedDeleteButton);
+        localStorage.removeItem('uploadedVideo');
+      });
+
+      // Menambahkan video, judul video, tombol unduh, dan tombol hapus ke dalam container
+      videoContainer.appendChild(savedVideoPlayer);
+      videoContainer.appendChild(savedVideoTitle);
+      videoContainer.appendChild(savedDownloadButton);
+      videoContainer.appendChild(savedDeleteButton);
+    }
+  </script>
+</body>
+</html>
